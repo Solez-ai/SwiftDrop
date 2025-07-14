@@ -18,7 +18,7 @@ function QRScreen() {
 
 const Tab = createBottomTabNavigator();
 
-export default function MainTabNavigator() {
+export default function MainTabNavigator({ showToast }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -35,11 +35,21 @@ export default function MainTabNavigator() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="File Manager" component={FileManagerScreen} />
-      <Tab.Screen name="Send" component={SendScreen} options={{ tabBarButton: () => null }} />
-      <Tab.Screen name="Receive" component={ReceiveScreen} options={{ tabBarButton: () => null }} />
-      <Tab.Screen name="QR" component={QRReceiveScreen} options={{ tabBarButton: () => null }} />
+      <Tab.Screen name="Home">
+        {props => <HomeScreen {...props} showToast={showToast} />}
+      </Tab.Screen>
+      <Tab.Screen name="File Manager">
+        {props => <FileManagerScreen {...props} showToast={showToast} />}
+      </Tab.Screen>
+      <Tab.Screen name="Send" options={{ tabBarButton: () => null }}>
+        {props => <SendScreen {...props} showToast={showToast} />}
+      </Tab.Screen>
+      <Tab.Screen name="Receive" options={{ tabBarButton: () => null }}>
+        {props => <ReceiveScreen {...props} showToast={showToast} />}
+      </Tab.Screen>
+      <Tab.Screen name="QR" options={{ tabBarButton: () => null }}>
+        {props => <QRReceiveScreen {...props} showToast={showToast} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 } 

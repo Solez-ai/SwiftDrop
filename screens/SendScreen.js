@@ -6,8 +6,10 @@ import { useBleSocket } from '../utils/BleSocketProvider';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as Notifications from 'expo-notifications';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 
-export default function SendScreen({ navigation }) {
+export default function SendScreen({ navigation, showToast }) {
   const [radarAnim] = useState(new Animated.Value(0));
   const [showQR, setShowQR] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -57,6 +59,8 @@ export default function SendScreen({ navigation }) {
   const pickFile = async () => {
     const res = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true });
     if (res.type === 'success') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      showToast(`File selected: ${res.name}`, 'success', 'file');
       setSelectedFile(res);
     }
   };
@@ -76,6 +80,8 @@ export default function SendScreen({ navigation }) {
     if (!selectedDevice || !selectedFile) return;
     setSending(true);
     setProgress(0);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    showToast('Sending file...', 'info', 'send');
     try {
       await sendFile({
         ip: selectedDevice.ip,
@@ -86,6 +92,7 @@ export default function SendScreen({ navigation }) {
       setSending(false);
       setProgress(1);
       setShowConfetti(true);
+      showToast('File sent successfully!', 'success', 'check-circle');
       Notifications.scheduleNotificationAsync({
         content: { title: 'SwiftDrop', body: 'File sent successfully!' },
         trigger: null,
@@ -94,6 +101,8 @@ export default function SendScreen({ navigation }) {
     } catch (e) {
       setSending(false);
       setProgress(null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      showToast('Send failed: ' + e.message, 'error', 'alert-circle');
       alert('Send failed: ' + e.message);
     }
   };
@@ -150,9 +159,17 @@ export default function SendScreen({ navigation }) {
 
   return (
     <View className="flex-1 bg-navy items-center justify-center">
+      {/* Subtle background gradient for depth */}
+      <LinearGradient
+        colors={["#1E293B", "#0F172A"]}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
       <Text className="text-white text-2xl font-poppins mb-4">Nearby Devices</Text>
       <View className="items-center justify-center mb-8">
         {/* Radar Animation */}
+        {/* Layered glowing radar pulses */}
         <Animated.View
           style={{
             position: 'absolute',
@@ -163,16 +180,48 @@ export default function SendScreen({ navigation }) {
             opacity: radarOpacity,
             transform: [{ scale: radarScale }],
             zIndex: 0,
+            shadowColor: '#4F46E5',
+            shadowOpacity: 0.5,
+            shadowRadius: 32,
           }}
         />
-        <View className="w-80 h-80 rounded-full bg-white/10 items-center justify-center shadow-lg" style={{ zIndex: 1 }}>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            width: 240,
+            height: 240,
+            borderRadius: 120,
+            backgroundColor: '#4F46E5',
+            opacity: radarOpacity.interpolate({ inputRange: [0, 1], outputRange: [0.15, 0] }),
+            zIndex: 0,
+            shadowColor: '#22D3EE',
+            shadowOpacity: 0.3,
+            shadowRadius: 24,
+          }}
+        />
+        <View className="w-80 h-80 rounded-full bg-whiteGlass shadow-glass backdrop-blur-md items-center justify-center" style={{ zIndex: 1 }}>
           <MaterialCommunityIcons name="wifi" size={48} color="#22D3EE" style={{ marginTop: 32 }} />
           <Text className="text-white/70 mt-2">{isScanning ? 'Searching for devices...' : 'Scan stopped'}</Text>
           {/* Device Avatars */}
           <ScrollView className="absolute w-full h-full" contentContainerStyle={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }} horizontal>
             {devices.map((dev, idx) => (
-              <TouchableOpacity key={dev.id} onPress={() => setSelectedDevice(dev)} className="mx-4 items-center">
-                <View className={`w-16 h-16 rounded-full ${selectedDevice && selectedDevice.id === dev.id ? 'border-4 border-cyan' : ''}`} style={{ backgroundColor: '#4F46E5', shadowColor: '#4F46E5', shadowOpacity: 0.7, shadowRadius: 12 }} />
+              <TouchableOpacity key={dev.id} onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                showToast(`Selected device: ${dev.name}`, 'info', 'cellphone');
+                setSelectedDevice(dev);
+              }} className="mx-4 items-center" accessibilityRole="button" accessibilityLabel={`Device: ${dev.name}`}>
+                <Animated.View style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 32,
+                  backgroundColor: selectedDevice && selectedDevice.id === dev.id ? '#22D3EE' : '#4F46E5',
+                  borderWidth: selectedDevice && selectedDevice.id === dev.id ? 4 : 0,
+                  borderColor: '#22D3EE',
+                  shadowColor: selectedDevice && selectedDevice.id === dev.id ? '#22D3EE' : '#4F46E5',
+                  shadowOpacity: 0.7,
+                  shadowRadius: selectedDevice && selectedDevice.id === dev.id ? 24 : 12,
+                  marginBottom: 4,
+                }} />
                 <Text className="text-white font-poppins text-xs mt-2" numberOfLines={1}>{dev.name}</Text>
               </TouchableOpacity>
             ))}
@@ -180,12 +229,13 @@ export default function SendScreen({ navigation }) {
         </View>
       </View>
       {/* File Picker and Send */}
-      <TouchableOpacity className="mt-4 px-8 py-3 bg-cyan rounded-full flex-row items-center justify-center" onPress={pickFile}>
+      <TouchableOpacity className="mt-4 px-8 py-3 bg-cyan rounded-full flex-row items-center justify-center shadow-glowCyan" style={{ shadowColor: '#22D3EE', shadowOpacity: 0.7, shadowRadius: 16 }} onPress={pickFile} accessibilityRole="button" accessibilityLabel="Pick file to send">
         {selectedFile && <MaterialCommunityIcons name={getFileIcon(selectedFile.name)} size={22} color="#4F46E5" style={{ marginRight: 8 }} />}
         <Text className="text-navy font-poppins">{selectedFile ? selectedFile.name : 'Pick File'}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className={`mt-4 px-8 py-3 rounded-full ${selectedDevice && selectedFile ? 'bg-purple' : 'bg-white/20'}`}
+        className={`mt-4 px-8 py-3 rounded-full ${selectedDevice && selectedFile ? 'bg-purple shadow-glow' : 'bg-white/20'}`}
+        style={selectedDevice && selectedFile ? { shadowColor: '#4F46E5', shadowOpacity: 0.7, shadowRadius: 16 } : {}}
         onPress={handleSend}
         disabled={!selectedDevice || !selectedFile || sending}
       >
@@ -197,12 +247,16 @@ export default function SendScreen({ navigation }) {
       </TouchableOpacity>
       {progress !== null && (
         <View className="w-64 h-2 bg-white/20 rounded-full mt-4">
-          <View className="h-2 bg-cyan rounded-full" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <Animated.View className="h-2 bg-cyan rounded-full" style={{ width: `${Math.round(progress * 100)}%`, shadowColor: '#22D3EE', shadowOpacity: 0.5, shadowRadius: 8 }} />
         </View>
       )}
       {error && <Text className="text-red-400 mt-4">{error}</Text>}
       {/* QR Toggle */}
-      <TouchableOpacity className="mt-8 px-8 py-3 bg-cyan rounded-full" onPress={() => setQrScanMode(true)} accessibilityRole="button" accessibilityLabel="Send via QR">
+      <TouchableOpacity className="mt-8 px-8 py-3 bg-cyan rounded-full shadow-glowCyan" style={{ shadowColor: '#22D3EE', shadowOpacity: 0.7, shadowRadius: 16 }} onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        showToast('Send via QR mode', 'info', 'qrcode');
+        setQrScanMode(true);
+      }} accessibilityRole="button" accessibilityLabel="Send via QR">
         <Text className="text-navy font-poppins">Send via QR</Text>
       </TouchableOpacity>
       {showConfetti && <ConfettiCannon count={120} origin={{x: 200, y: 0}} fadeOut autoStart ref={confettiRef} />}
