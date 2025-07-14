@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { AdMobBanner } from 'expo-ads-admob';
 
 export default function HomeScreen({ navigation, showToast }) {
   // Animated pulse for buttons
@@ -94,9 +95,25 @@ export default function HomeScreen({ navigation, showToast }) {
           {/* Ad Container */}
           <View className="w-full bg-whiteGlass rounded-xl p-4 mt-4 items-center justify-center border border-white/15 shadow-glass backdrop-blur-md">
             <Text className="text-white/70 text-xs mb-2">Thanks for supporting this app</Text>
+            <View className="w-32 h-16 bg-white/20 rounded-lg items-center justify-center mb-2">
+              {/* Banner 1 */}
+              <AdMobBanner
+                bannerSize="SMART_BANNER"
+                adUnitID="ca-app-pub-6451544348873646/3269604047"
+                servePersonalizedAds
+                onDidFailToReceiveAdWithError={err => console.log('Banner 1 error', err)}
+                style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' }}
+              />
+            </View>
             <View className="w-32 h-16 bg-white/20 rounded-lg items-center justify-center">
-              {/* Static image ad placeholder */}
-              <Text className="text-white/40">[Ad Image]</Text>
+              {/* Banner 2 */}
+              <AdMobBanner
+                bannerSize="SMART_BANNER"
+                adUnitID="ca-app-pub-6451544348873646/8190758235"
+                servePersonalizedAds
+                onDidFailToReceiveAdWithError={err => console.log('Banner 2 error', err)}
+                style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' }}
+              />
             </View>
           </View>
         </View>

@@ -1,4 +1,9 @@
 {
   "name": "my-swiftdrop-app",
-  "slug": "my-swiftdrop-app"
+  "slug": "my-swiftdrop-app",
+  "android": {
+    "config": {
+      "googleMobileAdsAppId": "ca-app-pub-6451544348873646~5129195215"
+    }
+  }
 }
