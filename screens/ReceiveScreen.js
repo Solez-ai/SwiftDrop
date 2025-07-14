@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Platform, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { useBleSocket } from '../utils/BleSocketProvider';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as Notifications from 'expo-notifications';
+import * as IntentLauncher from 'expo-intent-launcher';
 
 export default function ReceiveScreen() {
   const [step, setStep] = useState('waiting');
@@ -15,6 +16,7 @@ export default function ReceiveScreen() {
   const [fileName, setFileName] = useState('');
   const [isReady, setIsReady] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const confettiRef = useRef();
 
   const { startServer, transferProgress, receivedFile, error, incomingConnection } = useBleSocket();
@@ -58,9 +60,22 @@ export default function ReceiveScreen() {
 
   const handleOpenFile = async () => {
     if (fileUri) {
-      await FileSystem.getContentUriAsync(fileUri).then(uri => {
-        Alert.alert('File saved', uri);
-      });
+      const ext = fileUri.split('.').pop().toLowerCase();
+      if (Platform.OS === 'android' && ext === 'apk') {
+        try {
+          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+            data: 'file://' + fileUri,
+            flags: 1,
+            type: 'application/vnd.android.package-archive',
+          });
+        } catch (e) {
+          setShowInstallGuide(true);
+        }
+      } else {
+        await FileSystem.getContentUriAsync(fileUri).then(uri => {
+          Alert.alert('File saved', uri);
+        });
+      }
     }
   };
 
@@ -162,6 +177,24 @@ export default function ReceiveScreen() {
           <Text className="text-navy font-poppins">Back</Text>
         </TouchableOpacity>
         {error && <Text className="text-red-400 mt-4">{error}</Text>}
+      </View>
+    );
+  }
+
+  if (showInstallGuide) {
+    return (
+      <View className="flex-1 bg-navy items-center justify-center px-6">
+        <Text className="text-white text-xl font-poppins mb-4">Install APK</Text>
+        <Text className="text-white/70 mb-4 text-center">To install this app, you may need to allow installation from unknown sources in your device settings.</Text>
+        <View className="w-64 h-40 bg-white/10 rounded-2xl items-center justify-center mb-4">
+          <MaterialCommunityIcons name="android" size={64} color="#22D3EE" />
+        </View>
+        <TouchableOpacity className="mt-4 px-8 py-3 bg-cyan rounded-full" onPress={() => Linking.openSettings()}>
+          <Text className="text-navy font-poppins">Open Settings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="mt-4 px-8 py-3 bg-purple rounded-full" onPress={() => setShowInstallGuide(false)}>
+          <Text className="text-white font-poppins">Back</Text>
+        </TouchableOpacity>
       </View>
     );
   }

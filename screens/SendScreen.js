@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Easing, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Easing, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useBleSocket } from '../utils/BleSocketProvider';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as Notifications from 'expo-notifications';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 export default function SendScreen({ navigation }) {
   const [radarAnim] = useState(new Animated.Value(0));
@@ -15,6 +16,8 @@ export default function SendScreen({ navigation }) {
   const [progress, setProgress] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const confettiRef = useRef();
+  const [qrScanMode, setQrScanMode] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState(null);
 
   const {
     devices,
@@ -38,6 +41,15 @@ export default function SendScreen({ navigation }) {
     startScanning();
     return stopScanning;
   }, []);
+
+  useEffect(() => {
+    if (qrScanMode) {
+      (async () => {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasCameraPermission(status === 'granted');
+      })();
+    }
+  }, [qrScanMode]);
 
   const radarScale = radarAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.5] });
   const radarOpacity = radarAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] });
@@ -85,6 +97,41 @@ export default function SendScreen({ navigation }) {
       alert('Send failed: ' + e.message);
     }
   };
+
+  const handleQrScanned = ({ data }) => {
+    try {
+      const session = JSON.parse(data);
+      if (session.ip && session.port) {
+        setSelectedDevice({ id: 'qr', name: 'QR Session', ip: session.ip, port: session.port });
+        setQrScanMode(false);
+      }
+    } catch (e) {
+      alert('Invalid QR code');
+    }
+  };
+
+  if (qrScanMode) {
+    return (
+      <View className="flex-1 bg-navy items-center justify-center">
+        <Text className="text-white text-xl font-poppins mb-4">Scan Receiver QR</Text>
+        {hasCameraPermission === null ? (
+          <ActivityIndicator color="#4F46E5" />
+        ) : hasCameraPermission === false ? (
+          <Text className="text-red-400">Camera permission denied</Text>
+        ) : (
+          <BarCodeScanner
+            onBarCodeScanned={handleQrScanned}
+            style={{ width: 300, height: 300, borderRadius: 24, overflow: 'hidden' }}
+            barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+            accessibilityLabel="QR code scanner"
+          />
+        )}
+        <TouchableOpacity className="mt-8 px-8 py-3 bg-purple rounded-full" onPress={() => setQrScanMode(false)} accessibilityRole="button" accessibilityLabel="Back to Radar">
+          <Text className="text-white font-poppins">Back to Radar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (showQR) {
     // Placeholder for QR send mode
@@ -155,7 +202,7 @@ export default function SendScreen({ navigation }) {
       )}
       {error && <Text className="text-red-400 mt-4">{error}</Text>}
       {/* QR Toggle */}
-      <TouchableOpacity className="mt-8 px-8 py-3 bg-cyan rounded-full" onPress={() => setShowQR(true)}>
+      <TouchableOpacity className="mt-8 px-8 py-3 bg-cyan rounded-full" onPress={() => setQrScanMode(true)} accessibilityRole="button" accessibilityLabel="Send via QR">
         <Text className="text-navy font-poppins">Send via QR</Text>
       </TouchableOpacity>
       {showConfetti && <ConfettiCannon count={120} origin={{x: 200, y: 0}} fadeOut autoStart ref={confettiRef} />}
