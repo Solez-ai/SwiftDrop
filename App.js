@@ -10,6 +10,7 @@ import MainTabNavigator from './navigation/MainTabNavigator';
 import { BleSocketProvider } from './utils/BleSocketProvider';
 import GlassyToast from './components/GlassyToast';
 import * as Haptics from 'expo-haptics';
+import AnimatedSplash from './components/AnimatedSplash';
 
 // Ignore warnings for demo purposes (remove in production)
 LogBox.ignoreLogs(["Require cycle:"]);
@@ -17,6 +18,7 @@ LogBox.ignoreLogs(["Require cycle:"]);
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [splashVisible, setSplashVisible] = useState(true);
   const [fontsLoaded] = useFonts({
     Poppins: require('./assets/fonts/Poppins-Medium.ttf'),
     'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
@@ -24,12 +26,15 @@ export default function App() {
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View className="flex-1 items-center justify-center bg-navy">
-        <ActivityIndicator size="large" color="#4F46E5" />
-      </View>
-    );
+  useEffect(() => {
+    if (fontsLoaded && splashVisible) {
+      // Hide splash after animation
+      setTimeout(() => setSplashVisible(false), 1800);
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded || splashVisible) {
+    return <AnimatedSplash onFinish={() => setSplashVisible(false)} />;
   }
 
   const [toast, setToast] = useState({ visible: false, message: '', icon: 'information', type: 'info' });

@@ -1,9 +1,16 @@
 {
   "name": "my-swiftdrop-app",
   "slug": "my-swiftdrop-app",
+  "icon": "./assets/icon.png",
+  "splash": {
+    "image": "./assets/splash.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#000000"
+  },
   "android": {
     "config": {
       "googleMobileAdsAppId": "ca-app-pub-6451544348873646~5129195215"
-    }
+    },
+    "package": "com.anonymous.myswiftdropapp"
   }
 }

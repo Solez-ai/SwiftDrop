@@ -6,6 +6,7 @@ import { Video } from 'expo-av';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import * as Sharing from 'expo-sharing';
 
 const categories = [
   { key: 'all', label: 'All Files', icon: 'folder-multiple' },
@@ -29,6 +30,8 @@ const mediaTypeMap = {
 const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip'];
 const apkExt = '.apk';
 
+const { InstalledApps } = NativeModules;
+
 export default function FileManagerScreen({ showToast }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -40,6 +43,7 @@ export default function FileManagerScreen({ showToast }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [apps, setApps] = useState([]); // Placeholder for installed apps
   const [installedApps, setInstalledApps] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(false);
   const toggleAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -164,6 +168,27 @@ export default function FileManagerScreen({ showToast }) {
         {selectedFiles.includes(file.id) && <MaterialCommunityIcons name="check-circle" size={20} color="#4F46E5" style={{ position: 'absolute', top: 4, right: 4 }} />}
       </TouchableOpacity>
     );
+  };
+
+  const fetchInstalledApps = async () => {
+    setLoadingApps(true);
+    try {
+      const result = await InstalledApps.getInstalledApps();
+      setApps(result);
+    } catch (e) {
+      setApps([]);
+    }
+    setLoadingApps(false);
+  };
+
+  useEffect(() => {
+    fetchInstalledApps();
+  }, []);
+
+  const shareApk = async (apkPath) => {
+    try {
+      await Sharing.shareAsync(apkPath);
+    } catch (e) {}
   };
 
   if (hasPermission === null) {

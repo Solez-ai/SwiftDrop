@@ -20,9 +20,15 @@
     "build": "webpack",
     "dev": "set NODE_ENV=development&& webpack",
     "prepublishOnly": "webpack",
-    "test": "echo \"No tests exist.\" && exit 0"
+    "test": "echo \"No tests exist.\" && exit 0",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
-  "dependencies": {},
+  "dependencies": {
+    "expo": "~53.0.17",
+    "react": "19.0.0",
+    "react-native": "0.79.5"
+  },
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
