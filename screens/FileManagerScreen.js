@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Modal, FlatList, Platform, NativeModules, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, Modal, FlatList, Platform, NativeModules, Animated, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import { Video } from 'expo-av';
@@ -188,7 +188,9 @@ export default function FileManagerScreen({ showToast }) {
   const shareApk = async (apkPath) => {
     try {
       await Sharing.shareAsync(apkPath);
-    } catch (e) {}
+    } catch (e) {
+      Alert.alert('Sharing Failed', 'Could not share APK. Please try again.');
+    }
   };
 
   if (hasPermission === null) {
@@ -281,32 +283,22 @@ export default function FileManagerScreen({ showToast }) {
       )}
       {!loading && !error && (
         selectedCategory === 'apps' ? (
-          <FlatList
-            data={installedApps}
-            key={'apps'}
-            numColumns={1}
-            keyExtractor={item => item.packageName}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                key={item.packageName}
-                className="flex-row items-center p-3 mb-2 rounded-xl bg-whiteGlass shadow-glass backdrop-blur-md border border-white/15"
-                accessibilityRole="button"
-                accessibilityLabel={`App: ${item.appName}`}
-                onPress={() => {
-                  // Use your existing send logic, e.g. open send screen with APK path
-                  // navigation.navigate('Send', { fileUri: item.apkPath, fileName: item.appName + '.apk' });
-                  alert('Ready to share APK: ' + item.appName);
-                }}
-              >
-                <Image source={{ uri: item.icon }} style={{ width: 48, height: 48, borderRadius: 8, marginRight: 12 }} />
-                <View>
-                  <Text className="text-white font-poppins" numberOfLines={1}>{item.appName}</Text>
-                  <Text className="text-white/60 text-xs" numberOfLines={1}>{item.packageName}</Text>
+          loadingApps ? (
+            <ActivityIndicator size="large" color="#4F46E5" style={{ margin: 16 }} />
+          ) : (
+            <FlatList
+              data={apps}
+              keyExtractor={item => item.package}
+              renderItem={({ item }) => (
+                <View style={{ flexDirection: 'row', alignItems: 'center', margin: 8 }}>
+                  <Text style={{ color: '#fff', flex: 1 }}>{item.name}</Text>
+                  <TouchableOpacity onPress={() => shareApk(item.apkPath)} style={{ backgroundColor: '#4F46E5', padding: 8, borderRadius: 8 }}>
+                    <Text style={{ color: '#fff' }}>Share APK</Text>
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            )}
-            contentContainerStyle={{ padding: 8 }}
-          />
+              )}
+            />
+          )
         ) : (
           viewMode === 'grid' ? (
             <FlatList

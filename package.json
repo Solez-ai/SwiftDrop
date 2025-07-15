@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "expo": "~53.0.17",
+    "expo-ads-admob": "^13.0.0",
     "react": "19.0.0",
     "react-native": "0.79.5"
   },
