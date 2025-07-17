@@ -8,7 +8,7 @@ import * as Notifications from 'expo-notifications';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { AdMobRewarded, setTestDeviceIDAsync } from 'expo-ads-admob';
+import RewardedAdButton from '../components/RewardedAd';
 
 export default function SendScreen({ navigation, showToast }) {
   const [radarAnim] = useState(new Animated.Value(0));
@@ -21,9 +21,6 @@ export default function SendScreen({ navigation, showToast }) {
   const confettiRef = useRef();
   const [qrScanMode, setQrScanMode] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
-  const [showRewardedAd, setShowRewardedAd] = useState(false);
-  const [rewardedLoaded, setRewardedLoaded] = useState(false);
-  const [rewardedClosed, setRewardedClosed] = useState(false);
 
   const REWARDED_AD_UNIT_ID = 'ca-app-pub-6451544348873646/8276171104';
   const ADMOB_APP_ID = 'ca-app-pub-6451544348873646~5129195215';
@@ -59,20 +56,6 @@ export default function SendScreen({ navigation, showToast }) {
       })();
     }
   }, [qrScanMode]);
-
-  useEffect(() => {
-    AdMobRewarded.setAdUnitID(REWARDED_AD_UNIT_ID);
-    setTestDeviceIDAsync('EMULATOR');
-    AdMobRewarded.addEventListener('rewardedVideoDidLoad', () => setRewardedLoaded(true));
-    AdMobRewarded.addEventListener('rewardedVideoDidClose', () => {
-      setShowRewardedAd(false);
-      setRewardedClosed(true);
-    });
-    AdMobRewarded.addEventListener('rewardedVideoDidFailToLoad', () => setRewardedLoaded(false));
-    return () => {
-      AdMobRewarded.removeAllListeners();
-    };
-  }, []);
 
   const radarScale = radarAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 2.5] });
   const radarOpacity = radarAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] });
@@ -120,12 +103,12 @@ export default function SendScreen({ navigation, showToast }) {
       });
       setTimeout(() => setShowConfetti(false), 4000);
       // Show rewarded ad after confetti
-      setTimeout(() => {
-        setShowRewardedAd(true);
-        setRewardedLoaded(false);
-        setRewardedClosed(false);
-        AdMobRewarded.requestAdAsync().catch(() => {});
-      }, 4000);
+      // setTimeout(() => {
+      //   setShowRewardedAd(true);
+      //   setRewardedLoaded(false);
+      //   setRewardedClosed(false);
+      //   AdMobRewarded.requestAdAsync().catch(() => {});
+      // }, 4000);
     } catch (e) {
       setSending(false);
       setProgress(null);
@@ -288,32 +271,12 @@ export default function SendScreen({ navigation, showToast }) {
         <Text className="text-navy font-poppins">Send via QR</Text>
       </TouchableOpacity>
       {showConfetti && <ConfettiCannon count={120} origin={{x: 200, y: 0}} fadeOut autoStart ref={confettiRef} />}
-      {/* Add modal for rewarded ad */}
-      <Modal
-        visible={showRewardedAd}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {}}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(15,23,42,0.85)', alignItems: 'center', justifyContent: 'center' }}>
-          <View style={{ backgroundColor: 'rgba(30,41,59,0.95)', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#4F46E5', shadowOpacity: 0.5, shadowRadius: 24 }}>
-            <Text style={{ color: '#fff', fontSize: 20, fontFamily: 'Poppins-Bold', marginBottom: 12 }}>Thanks for using SwiftDrop!</Text>
-            <Text style={{ color: '#fff', fontSize: 14, fontFamily: 'Poppins', marginBottom: 16, textAlign: 'center' }}>
-              Please watch this short ad to support us. You can close it after it finishes.
-            </Text>
-            {rewardedLoaded ? null : <ActivityIndicator color="#4F46E5" style={{ marginBottom: 16 }} />}
-            {/* Show the rewarded ad */}
-            {showRewardedAd && rewardedLoaded && !rewardedClosed && (
-              AdMobRewarded.showAdAsync()
-            )}
-            {rewardedClosed && (
-              <TouchableOpacity onPress={() => setShowRewardedAd(false)} style={{ marginTop: 16, backgroundColor: '#4F46E5', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}>
-                <Text style={{ color: '#fff', fontFamily: 'Poppins-Bold' }}>Close</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+      {/* Show rewarded ad button after confetti */}
+      {showConfetti && (
+        <View style={{ marginTop: 24 }}>
+          <RewardedAdButton />
         </View>
-      </Modal>
+      )}
     </View>
   );
 } 

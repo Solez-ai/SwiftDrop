@@ -31,7 +31,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
 }
 expoAutolinking.useExpoModules()
 
-rootProject.name = 'myswiftdropapp'
+rootProject.name = 'my-swiftdrop-app'
 
 expoAutolinking.useExpoVersionCatalog()
 

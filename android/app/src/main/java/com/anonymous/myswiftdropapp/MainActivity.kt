@@ -1,4 +1,4 @@
-package com.myswiftdropapp
+package com.anonymous.myswiftdropapp
 
 import android.os.Build
 import android.os.Bundle

@@ -3,14 +3,12 @@ import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { AdMobBanner } from 'expo-ads-admob';
+import { HomeBanner1, HomeBanner2 } from '../components/AdBanner';
 
 export default function HomeScreen({ navigation, showToast }) {
   // Animated pulse for buttons
   const sendPulse = useRef(new Animated.Value(1)).current;
   const receivePulse = useRef(new Animated.Value(1)).current;
-  const [ad1Error, setAd1Error] = useState(false);
-  const [ad2Error, setAd2Error] = useState(false);
 
   useEffect(() => {
     Animated.loop(
@@ -99,31 +97,11 @@ export default function HomeScreen({ navigation, showToast }) {
             <Text className="text-white/70 text-xs mb-2">Thanks for supporting this app</Text>
             <View className="w-32 h-16 bg-white/20 rounded-lg items-center justify-center mb-2">
               {/* Banner 1 */}
-              {ad1Error ? (
-                <Text style={{ color: '#fff', fontSize: 12 }}>Ad failed to load</Text>
-              ) : (
-                <AdMobBanner
-                  bannerSize="SMART_BANNER"
-                  adUnitID="ca-app-pub-6451544348873646/3269604047"
-                  servePersonalizedAds
-                  onDidFailToReceiveAdWithError={err => { setAd1Error(true); console.log('Banner 1 error', err); }}
-                  style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' }}
-                />
-              )}
+              <HomeBanner1 />
             </View>
             <View className="w-32 h-16 bg-white/20 rounded-lg items-center justify-center">
               {/* Banner 2 */}
-              {ad2Error ? (
-                <Text style={{ color: '#fff', fontSize: 12 }}>Ad failed to load</Text>
-              ) : (
-                <AdMobBanner
-                  bannerSize="SMART_BANNER"
-                  adUnitID="ca-app-pub-6451544348873646/8190758235"
-                  servePersonalizedAds
-                  onDidFailToReceiveAdWithError={err => { setAd2Error(true); console.log('Banner 2 error', err); }}
-                  style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: 'transparent' }}
-                />
-              )}
+              <HomeBanner2 />
             </View>
           </View>
         </View>

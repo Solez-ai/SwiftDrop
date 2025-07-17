@@ -1,4 +1,4 @@
-package com.myswiftdropapp
+package com.anonymous.myswiftdropapp
 
 import android.app.Application
 import android.content.res.Configuration
