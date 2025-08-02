@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Smartphone, QrCode, Radar } from 'lucide-react';
 import { generateQRCode } from '../utils/qrCodeUtil';
 import PermissionManager from '../lib/PermissionManager';
+import TransferEngine from '../lib/TransferEngine';
 
 interface Props {
   onBack: () => void;
@@ -40,13 +41,13 @@ export default function SendMode({ onBack }: Props) {
     setPermissions({ bluetooth, location });
   };
 
-  const startDeviceScanning = () = {
+  const startDeviceScanning = () => {
     setScanning(true);
     
     // Use TransferEngine for real device discovery
     const transferEngine = TransferEngine.getInstance();
-    transferEngine.setPeerDiscoveredCallback((peer) = {
-      setDevices(prev = [...prev, {
+    transferEngine.setPeerDiscoveredCallback((peer) => {
+      setDevices(prev => [...prev, {
         id: peer.id,
         name: peer.name,
         distance: Math.random() * 150,
@@ -57,13 +58,13 @@ export default function SendMode({ onBack }: Props) {
     transferEngine.startDeviceDiscovery();
   };
 
-  const handleFileSelect = () = {
+  const handleFileSelect = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-    input.onchange = (e) = {
+    input.onchange = (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
-      if (files.length > 0) {
+      if (files.length > 0) {
         console.log('Selected files:', files);
         // Here you would typically send the files to a selected device
         // For demo, let's show an alert
@@ -73,7 +74,7 @@ export default function SendMode({ onBack }: Props) {
     input.click();
   };
 
-  const handleDeviceClick = async (device: Device) = {
+  const handleDeviceClick = async (device: Device) => {
     const transferEngine = TransferEngine.getInstance();
     try {
       await transferEngine.connectToPeer(device.id, device.name);

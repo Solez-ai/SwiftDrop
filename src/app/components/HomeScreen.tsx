@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Download, HardDrive, SdCard } from 'lucide-react';
+import { Send, Download, HardDrive, HardDriveIcon as SdCard } from 'lucide-react';
 import SendMode from './SendMode';
 import ReceiveMode from './ReceiveMode';
 import TransferEngine from '../lib/TransferEngine';
@@ -26,7 +26,7 @@ export default function HomeScreen() {
     transferEngine.setFileReceivedCallback(handleFileReceived);
   }, []);
 
-  const handleTransferProgress = (progress: any) => {
+  const handleTransferProgress = (progress: { fileId: string; fileName: string; progress: number }) => {
     console.log('Transfer Progress:', progress);
   };
 
