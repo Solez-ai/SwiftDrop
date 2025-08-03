@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -14,7 +14,10 @@ import {
   Alert,
   useTheme,
   LinearProgress,
-  useMediaQuery
+  useMediaQuery,
+  useTransition,
+  styled,
+  alpha
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { WifiP2PPlugin } from '@capacitor-community/wifi-p2p';
@@ -24,6 +27,40 @@ import Radar from './Radar';
 import FilePicker from './FilePicker';
 import SuccessAnimation from './SuccessAnimation';
 import { formatStorage } from '../utils/fileUtils';
+import { theme } from '../theme';
+
+// Styled components for better control
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  borderRadius: 12,
+  transition: theme.transitions.create(['box-shadow', 'transform']),
+  '&:hover': {
+    boxShadow: theme.shadows[4],
+    transform: 'translateY(-2px)'
+  }
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  borderRadius: 8,
+  padding: '8px 24px',
+  textTransform: 'none',
+  fontWeight: 600,
+  transition: theme.transitions.create(['transform', 'box-shadow']),
+  '&:hover': {
+    transform: 'translateY(-1px)',
+    boxShadow: theme.shadows[2]
+  }
+}));
+
+const DeviceItem = styled('div')(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: 8,
+  transition: theme.transitions.create(['background-color', 'transform']),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    transform: 'translateY(-2px)'
+  }
+}));
 
 interface Device {
   deviceAddress: string;
@@ -46,6 +83,8 @@ interface ConnectionFailedEvent {
 
 const Home = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mode, setMode] = useState<'send' | 'receive'>('send');
   const [discoveredDevices, setDiscoveredDevices] = useState<Device[]>([]);
   const [isDiscovering, setIsDiscovering] = useState(false);
@@ -63,6 +102,14 @@ const Home = () => {
     total: 0,
     used: 0,
     free: 0
+  });
+  const [isRadarVisible, setIsRadarVisible] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [radarTransition, setRadarTransition] = useTransition(isRadarVisible, {
+    from: { opacity: 0, transform: 'scale(0.8)' },
+    enter: { opacity: 1, transform: 'scale(1)' },
+    config: { tension: 280, friction: 40 }
   });
 
   useEffect(() => {
@@ -212,179 +259,245 @@ const Home = () => {
   };
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 3, display: 'flex', gap: 2 }}>
-        <Button
-          variant="contained"
-          onClick={() => setMode('send')}
-          sx={{ flex: 1 }}
+    <Box sx={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      bgcolor: 'background.default'
+    }}>
+      <Box sx={{
+        p: 3,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        bgcolor: 'background.paper',
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.2)}`
+      }}>
+        <Typography variant="h4" component="h1">
+          {mode === 'send' ? 'Send Files' : 'Receive Files'}
+        </Typography>
+        <ActionButton
+          variant="outlined"
+          onClick={() => setMode(prev => prev === 'send' ? 'receive' : 'send')}
         >
-          Send Files
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => setMode('receive')}
-          sx={{ flex: 1 }}
-        >
-          Receive Files
-        </Button>
+          Switch to {mode === 'send' ? 'Receive' : 'Send'}
+        </ActionButton>
       </Box>
 
-      <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-        {mode === 'send' && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              Available Storage: {formatStorage(storageInfo.free)}
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={(storageInfo.used / storageInfo.total) * 100}
-              sx={{ height: 4 }}
-            />
-          </Box>
-        )}
+      <Box sx={{
+        flex: 1,
+        overflow: 'auto',
+        p: 3
+      }}>
         {mode === 'send' ? (
-          <>
-            <Box sx={{ mb: 2 }}>
-              <Button
-                variant="contained"
-                onClick={handleSendClick}
-                disabled={isDiscovering}
-                startIcon={isDiscovering ? <CircularProgress size={20} /> : undefined}
-              >
-                {isDiscovering ? 'Discovering...' : 'Discover Devices'}
-              </Button>
-            </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <StyledPaper>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <Typography variant="h6">
+                    Storage Info
+                  </Typography>
+                  <Box sx={{ width: '100%', maxWidth: 300 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={(storageInfo.used / storageInfo.total) * 100}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                    <Typography variant="body2">
+                      Used: {formatStorage(storageInfo.used)}
+                    </Typography>
+                    <Typography variant="body2">
+                      Free: {formatStorage(storageInfo.free)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </StyledPaper>
+            </Grid>
 
-            <Box sx={{ mb: 2 }}>
-              <Button
-                variant="contained"
-                onClick={() => setFilePickerOpen(true)}
-                disabled={selectedDevice === null}
-              >
-                Select Files
-              </Button>
-            </Box>
+            <Grid item xs={12} md={6}>
+              <StyledPaper>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="h6">
+                    Select Files
+                  </Typography>
+                  <ActionButton
+                    variant="contained"
+                    fullWidth
+                    onClick={() => setFilePickerOpen(true)}
+                  >
+                    Choose Files
+                  </ActionButton>
+                  <Box sx={{
+                    bgcolor: 'background.paper',
+                    p: 2,
+                    borderRadius: 1,
+                    height: 200,
+                    overflow: 'auto'
+                  }}>
+                    {selectedFiles.map((file, index) => (
+                      <Typography key={index} variant="body2">
+                        {file}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              </StyledPaper>
+            </Grid>
 
-            <Box sx={{ mb: 2 }}>
-              <Button
+            <Grid item xs={12} md={6}>
+              <StyledPaper>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="h6">
+                    Nearby Devices
+                  </Typography>
+                  {isDiscovering ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <Box>
+                      {discoveredDevices.map((device) => (
+                        <DeviceItem
+                          key={device.deviceAddress}
+                          onClick={() => handleDeviceSelect(device.deviceAddress)}
+                        >
+                          <Typography variant="body1">
+                            {device.deviceName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {device.deviceAddress}
+                          </Typography>
+                        </DeviceItem>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              </StyledPaper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <ActionButton
                 variant="contained"
+                fullWidth
+                disabled={!selectedDevice || !selectedFiles.length}
                 onClick={handleSendFiles}
-                disabled={selectedDevice === null || selectedFiles.length === 0}
               >
                 Send Files
-              </Button>
-            </Box>
-
-            {selectedDevice && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2">
-                  Selected Device: {selectedDevice}
-                </Typography>
-              </Box>
-            )}
-
-            {selectedFiles.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2">
-                  Selected Files: {selectedFiles.length}
-                </Typography>
-              </Box>
-            )}
-
-            {discoveredDevices.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2">Discovered Devices:</Typography>
-                <Grid container spacing={2}>
-                  {discoveredDevices.map((device) => (
-                    <Grid item xs={12} sm={6} md={4} key={device.deviceAddress}>
-                      <Paper
-                        sx={{
-                          p: 2,
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handleDeviceSelect(device.deviceAddress)}
-                      >
-                        <Typography variant="h6" gutterBottom>
-                          {device.deviceName}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {device.deviceAddress}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Status: {device.status}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            )}
-
-            {transferProgress > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2">Transfer Progress:</Typography>
-                <LinearProgress variant="determinate" value={transferProgress} />
-              </Box>
-            )}
-          </>
+              </ActionButton>
+            </Grid>
+          </Grid>
         ) : (
-          <>
-            <Box sx={{ mb: 2 }}>
-              <Button
-                variant="contained"
-                onClick={handleReceiveClick}
-                disabled={isConnected}
-              >
-                {isConnected ? 'Receiving...' : 'Start Receiving'}
-              </Button>
-            </Box>
-
-            {isConnected && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2">
-                  Waiting for files...
-                </Typography>
-              </Box>
-            )}
-          </>
+          <Box sx={{
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 3
+          }}>
+            <Typography variant="h4" component="h1" align="center">
+              Ready to Receive Files
+            </Typography>
+            <Typography variant="body1" color="text.secondary" align="center">
+              Connect with a nearby device to start receiving files
+            </Typography>
+            <ActionButton
+              variant="outlined"
+              size="large"
+              onClick={() => setQRDialogOpen(true)}
+            >
+              Show QR Code
+            </ActionButton>
+          </Box>
         )}
-      </Box>
 
-      <QRCodeDialog
-        open={qrDialogOpen}
-        onClose={() => setQRDialogOpen(false)}
-        deviceAddress={selectedDevice || ''}
-      />
+        {radarTransition((style, item) => (
+          item && (
+            <Box
+              ref={containerRef}
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 1000,
+                pointerEvents: 'none'
+              }}
+            >
+              <Radar
+                style={style}
+                onClose={() => setIsRadarVisible(false)}
+              />
+            </Box>
+          )
+        ))}
 
-      <FilePicker
-        open={filePickerOpen}
-        onClose={() => setFilePickerOpen(false)}
-        onFilesSelected={handleFileSelect}
-        storageInfo={storageInfo}
-      />
-
-      <SuccessAnimation
-        open={successAnimationOpen}
-        onClose={() => setSuccessAnimationOpen(false)}
-      />
-
-      <Snackbar
-        open={showSnackbar}
-        autoHideDuration={6000}
-        onClose={() => setShowSnackbar(false)}
-      >
-        <Alert
+        <Snackbar
+          open={showSnackbar}
+          autoHideDuration={6000}
           onClose={() => setShowSnackbar(false)}
-          severity={snackbarMessage.includes('Error') ? 'error' : 'success'}
-          sx={{ width: '100%' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={() => setShowSnackbar(false)}
+            severity={snackbarMessage.includes('Failed') ? 'error' : 'success'}
+            sx={{ width: '100%', bgcolor: 'background.paper' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+
+        <Dialog
+          open={qrDialogOpen}
+          onClose={() => setQRDialogOpen(false)}
+          PaperProps={{
+            sx: {
+              borderRadius: 16,
+              boxShadow: theme.shadows[4]
+            }
+          }}
+        >
+          <DialogTitle>Share QR Code</DialogTitle>
+          <DialogContent>
+            <QRCodeDialog onClose={() => setQRDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={filePickerOpen}
+          onClose={() => setFilePickerOpen(false)}
+          PaperProps={{
+            sx: {
+              borderRadius: 16,
+              boxShadow: theme.shadows[4]
+            }
+          }}
+        >
+          <DialogTitle>Select Files</DialogTitle>
+          <DialogContent>
+            <FilePicker onClose={() => setFilePickerOpen(false)} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={successAnimationOpen}
+          onClose={() => setSuccessAnimationOpen(false)}
+          PaperProps={{
+            sx: {
+              borderRadius: 16,
+              boxShadow: theme.shadows[4]
+            }
+          }}
+        >
+          <SuccessAnimation onClose={() => setSuccessAnimationOpen(false)} />
+        </Dialog>
+      </Box>
     </Box>
   );
 };
