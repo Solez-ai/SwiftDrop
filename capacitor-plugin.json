@@ -1,0 +1,9 @@
+{
+  "name": "WifiP2PPlugin",
+  "webDir": "dist",
+  "plugins": {
+    "WifiP2PPlugin": {
+      "enabled": true
+    }
+  }
+}
