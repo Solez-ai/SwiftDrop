@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   List,
-  ListItem,
+  ListItem as MuiListItem,
   ListItemText,
   ListItemAvatar,
   Avatar,
@@ -13,13 +13,11 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  CircularProgress,
-  useTheme
+  CircularProgress
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import FileIcon from '@mui/icons-material/InsertDriveFile';
-import { Filesystem, Directory, FilesystemEncoding } from '@capacitor/filesystem';
-import { WifiP2PPlugin } from '@capacitor-community/wifi-p2p';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 interface FilePickerProps {
   onFilesSelected: (files: string[]) => void;
@@ -41,7 +39,7 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadFiles();
   }, [currentPath]);
 
@@ -174,27 +172,23 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
         ) : (
           <List>
             {files.map((file) => (
-              <ListItem
+              <MuiListItem
                 key={file.path}
+                component="div"
                 button
                 onClick={() => handleFileSelect(file)}
-                sx={{
-                  backgroundColor: selectedFiles.includes(file.path) ? 'action.selected' : 'transparent'
-                }}
+                sx={{ backgroundColor: selectedFiles.includes(file.path) ? 'action.selected' : 'transparent' }}
               >
                 <ListItemAvatar>
                   <Avatar>
-                    {getFileIcon(file)}
+                    {file.isDirectory ? <FolderIcon /> : <FileIcon />}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={file.name}
-                  secondary={
-                    file.isDirectory ? 'Folder' :
-                    `${renderFileSize(file.size || 0)} • ${file.type.toUpperCase()}`
-                  }
+                  secondary={file.isDirectory ? null : `${renderFileSize(file.size || 0)} • ${file.type.toUpperCase()}`}
                 />
-              </ListItem>
+              </MuiListItem>
             ))}
           </List>
         )}

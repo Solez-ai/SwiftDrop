@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
-  Button,
-  Grid,
+  Button as MuiButton,
+  Grid as MuiGrid,
   Paper,
   CircularProgress,
   Dialog,
@@ -15,12 +15,11 @@ import {
   useTheme,
   LinearProgress,
   useMediaQuery,
-  useTransition,
   styled,
-  alpha
+  alpha,
+  Transitions
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { WifiP2PPlugin } from '@capacitor-community/wifi-p2p';
 import { Filesystem } from '@capacitor/filesystem';
 import QRCodeDialog from './QRCode';
 import Radar from './Radar';
@@ -104,6 +103,7 @@ const Home = () => {
     free: 0
   });
   const [isRadarVisible, setIsRadarVisible] = useState(false);
+  const [isFilePickerOpen, setIsFilePickerOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [radarTransition, setRadarTransition] = useTransition(isRadarVisible, {
@@ -180,41 +180,39 @@ const Home = () => {
     }
   }, []);
 
-  const handleSendClick = async () => {
-    if (!isConnected) {
-      setIsDiscovering(true);
-      try {
-        await WifiP2PPlugin.startDiscovery();
-      } catch (error) {
-        console.error('Error starting discovery:', error);
-        setIsDiscovering(false);
-      }
+  const handleSendClick = useCallback(async () => {
+    try {
+      setIsFilePickerOpen(true);
+    } catch (error) {
+      console.error('Error in handleSendClick:', error);
+      setSnackbarMessage('Error: Failed to send files');
+      setShowSnackbar(true);
     }
-  };
+  }, []);
 
-  const handleReceiveClick = async () => {
+  const handleReceiveClick = useCallback(async () => {
     try {
       await WifiP2PPlugin.startDiscovery();
       setIsConnected(true);
     } catch (error) {
       console.error('Error starting receive mode:', error);
     }
-  };
+  }, []);
 
-  const handleDeviceSelect = async (deviceAddress: string) => {
+  const handleDeviceSelect = useCallback(async (deviceAddress: string) => {
     try {
       await WifiP2PPlugin.connectToDevice({ deviceAddress });
       setSelectedDevice(deviceAddress);
     } catch (error) {
       console.error('Error connecting to device:', error);
     }
-  };
+  }, []);
 
-  const handleFileSelect = async (files: string[]) => {
+  const handleFileSelect = useCallback(async (files: string[]) => {
     setSelectedFiles(files);
-  };
+  }, []);
 
-  const handleSendFiles = async () => {
+  const handleSendFiles = useCallback(async () => {
     try {
       if (selectedFiles.length === 0) {
         throw new Error('No files selected');
@@ -244,9 +242,9 @@ const Home = () => {
       setSnackbarMessage(`Error: ${error.message}`);
       setShowSnackbar(true);
     }
-  };
+  }, [selectedFiles, selectedDevice]);
 
-  const handleStop = async () => {
+  const handleStop = useCallback(async () => {
     try {
       await WifiP2PPlugin.stopDiscovery();
       setIsDiscovering(false);
@@ -256,7 +254,7 @@ const Home = () => {
     } catch (error) {
       console.error('Error stopping:', error);
     }
-  };
+  }, []);
 
   return (
     <Box sx={{
@@ -290,8 +288,8 @@ const Home = () => {
         p: 3
       }}>
         {mode === 'send' ? (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <MuiGrid container spacing={3}>
+            <MuiGrid item xs={12}>
               <StyledPaper>
                 <Box sx={{
                   display: 'flex',
@@ -317,9 +315,39 @@ const Home = () => {
                   </Box>
                 </Box>
               </StyledPaper>
-            </Grid>
+            </MuiGrid>
 
-            <Grid item xs={12} md={6}>
+            <MuiGrid item xs={12} md={6}>
+              <StyledPaper>
+                <Typography variant="h6" gutterBottom>
+                  Send Files
+                </Typography>
+                <MuiButton
+                  variant="contained"
+                  fullWidth
+                  onClick={handleSendClick}
+                >
+                  Connect
+                </MuiButton>
+              </StyledPaper>
+            </MuiGrid>
+
+            <MuiGrid item xs={12} md={6}>
+              <StyledPaper>
+                <Typography variant="h6" gutterBottom>
+                  Receive Files
+                </Typography>
+                <MuiButton
+                  variant="contained"
+                  fullWidth
+                  onClick={handleReceiveClick}
+                >
+                  Receive Files
+                </MuiButton>
+              </StyledPaper>
+            </MuiGrid>
+
+            <MuiGrid item xs={12}>
               <StyledPaper>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Typography variant="h6">
@@ -328,7 +356,7 @@ const Home = () => {
                   <ActionButton
                     variant="contained"
                     fullWidth
-                    onClick={() => setFilePickerOpen(true)}
+                    onClick={() => setIsFilePickerOpen(true)}
                   >
                     Choose Files
                   </ActionButton>
@@ -347,9 +375,9 @@ const Home = () => {
                   </Box>
                 </Box>
               </StyledPaper>
-            </Grid>
+            </MuiGrid>
 
-            <Grid item xs={12} md={6}>
+            <MuiGrid item xs={12}>
               <StyledPaper>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Typography variant="h6">
@@ -378,9 +406,9 @@ const Home = () => {
                   )}
                 </Box>
               </StyledPaper>
-            </Grid>
+            </MuiGrid>
 
-            <Grid item xs={12}>
+            <MuiGrid item xs={12}>
               <ActionButton
                 variant="contained"
                 fullWidth
@@ -389,8 +417,8 @@ const Home = () => {
               >
                 Send Files
               </ActionButton>
-            </Grid>
-          </Grid>
+            </MuiGrid>
+          </MuiGrid>
         ) : (
           <Box sx={{
             height: '100%',
