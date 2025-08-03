@@ -1,22 +1,22 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
-const themeOptions: ThemeOptions = {
+const theme = createTheme({
   palette: {
     primary: {
-      main: '#2196F3', // SwiftDrop Blue
+      main: '#2196F3',
       light: '#64B5F6',
       dark: '#1976D2',
       contrastText: '#FFFFFF'
     },
     secondary: {
-      main: '#FF5722', // SwiftDrop Orange
+      main: '#FF5722',
       light: '#FF8A65',
       dark: '#F4511E',
       contrastText: '#FFFFFF'
     },
     background: {
-      default: '#121212', // Dark background
-      paper: '#1E1E1E'    // Slightly lighter background
+      default: '#121212',
+      paper: '#1E1E1E'
     },
     text: {
       primary: '#FFFFFF',
@@ -135,65 +135,10 @@ const themeOptions: ThemeOptions = {
       }
     }
   },
+
   transitions: {
     create: (props = 'all') => `cubic-bezier(0.4, 0, 0.2, 1) ${props} 0.3s`
-  },
-  shadows: [
-    'none',
-    '0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
-    '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
-    '0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
-    '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
-    '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 5px 8px 0px rgba(0,0,0,0.14), 0px 1px 14px 0px rgba(0,0,0,0.12)',
-    '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
-    '0px 4px 5px -2px rgba(0,0,0,0.2), 0px 7px 10px 1px rgba(0,0,0,0.14), 0px 2px 16px 1px rgba(0,0,0,0.12)',
-    '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)',
-    '0px 5px 6px -3px rgba(0,0,0,0.2), 0px 9px 12px 1px rgba(0,0,0,0.14), 0px 3px 16px 2px rgba(0,0,0,0.12)',
-    '0px 6px 6px -3px rgba(0,0,0,0.2), 0px 10px 14px 1px rgba(0,0,0,0.14), 0px 4px 18px 3px rgba(0,0,0,0.12)',
-    '0px 6px 7px -4px rgba(0,0,0,0.2), 0px 11px 15px 1px rgba(0,0,0,0.14), 0px 4px 20px 3px rgba(0,0,0,0.12)',
-    '0px 7px 8px -4px rgba(0,0,0,0.2), 0px 12px 17px 2px rgba(0,0,0,0.14), 0px 5px 22px 4px rgba(0,0,0,0.12)',
-    '0px 7px 8px -4px rgba(0,0,0,0.2), 0px 13px 19px 2px rgba(0,0,0,0.14), 0px 5px 24px 4px rgba(0,0,0,0.12)',
-    '0px 7px 9px -4px rgba(0,0,0,0.2), 0px 14px 21px 2px rgba(0,0,0,0.14), 0px 5px 26px 4px rgba(0,0,0,0.12)',
-    '0px 8px 9px -5px rgba(0,0,0,0.2), 0px 15px 22px 2px rgba(0,0,0,0.14), 0px 6px 28px 5px rgba(0,0,0,0.12)',
-    '0px 8px 10px -5px rgba(0,0,0,0.2), 0px 16px 24px 2px rgba(0,0,0,0.14), 0px 6px 30px 5px rgba(0,0,0,0.12)',
-    '0px 9px 11px -5px rgba(0,0,0,0.2), 0px 17px 26px 2px rgba(0,0,0,0.14), 0px 6px 32px 5px rgba(0,0,0,0.12)',
-    '0px 9px 11px -5px rgba(0,0,0,0.2), 0px 18px 28px 2px rgba(0,0,0,0.14), 0px 7px 34px 6px rgba(0,0,0,0.12)',
-    '0px 10px 13px -6px rgba(0,0,0,0.2), 0px 19px 29px 3px rgba(0,0,0,0.14), 0px 7px 36px 6px rgba(0,0,0,0.12)',
-    '0px 10px 13px -6px rgba(0,0,0,0.2), 0px 20px 31px 3px rgba(0,0,0,0.14), 0px 8px 38px 7px rgba(0,0,0,0.12)',
-    '0px 11px 14px -7px rgba(0,0,0,0.2), 0px 21px 33px 3px rgba(0,0,0,0.14), 0px 8px 40px 7px rgba(0,0,0,0.12)',
-    '0px 11px 15px -7px rgba(0,0,0,0.2), 0px 22px 35px 3px rgba(0,0,0,0.14), 0px 8px 42px 7px rgba(0,0,0,0.12)',
-    '0px 12px 17px -9px rgba(0,0,0,0.2), 0px 23px 36px 3px rgba(0,0,0,0.14), 0px 9px 44px 8px rgba(0,0,0,0.12)',
-    '0px 13px 19px -9px rgba(0,0,0,0.2), 0px 24px 38px 3px rgba(0,0,0,0.14), 0px 9px 46px 8px rgba(0,0,0,0.12)',
+  }
+});
 
-  ]
-};
-
-import { createTheme } from '@mui/material/styles';
-
-const customShadows = [
-  'none',
-  '0px 14px 21px -9px rgba(0,0,0,0.2), 0px 25px 40px 3px rgba(0,0,0,0.14), 0px 10px 48px 9px rgba(0,0,0,0.12)',
-  '0px 15px 22px -10px rgba(0,0,0,0.2), 0px 26px 42px 3px rgba(0,0,0,0.14), 0px 10px 50px 9px rgba(0,0,0,0.12)',
-  '0px 15px 24px -10px rgba(0,0,0,0.2), 0px 27px 44px 3px rgba(0,0,0,0.14), 0px 11px 52px 9px rgba(0,0,0,0.12)',
-  '0px 16px 24px -10px rgba(0,0,0,0.2), 0px 28px 46px 3px rgba(0,0,0,0.14), 0px 11px 54px 10px rgba(0,0,0,0.12)',
-  '0px 17px 26px -10px rgba(0,0,0,0.2), 0px 29px 48px 4px rgba(0,0,0,0.14), 0px 12px 56px 10px rgba(0,0,0,0.12)',
-  '0px 18px 28px -11px rgba(0,0,0,0.2), 0px 30px 50px 4px rgba(0,0,0,0.14), 0px 13px 58px 11px rgba(0,0,0,0.12)',
-  '0px 19px 30px -11px rgba(0,0,0,0.2), 0px 31px 52px 4px rgba(0,0,0,0.14), 0px 14px 60px 11px rgba(0,0,0,0.12)',
-
-  ...Array(17).fill('none'),
-];
-
-const themeOptions = {
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-  shadows: customShadows,
-};
-
-export const theme = createTheme(themeOptions);
+export default theme;
