@@ -4,14 +4,10 @@ const theme = createTheme({
   palette: {
     primary: {
       main: '#2196F3',
-      light: '#64B5F6',
-      dark: '#1976D2',
       contrastText: '#FFFFFF'
     },
     secondary: {
       main: '#FF5722',
-      light: '#FF8A65',
-      dark: '#F4511E',
       contrastText: '#FFFFFF'
     },
     background: {
@@ -20,51 +16,22 @@ const theme = createTheme({
     },
     text: {
       primary: '#FFFFFF',
-      secondary: '#BDBDBD',
-      disabled: '#757575'
-    },
-    action: {
-      active: '#FFFFFF',
-      hover: 'rgba(255, 255, 255, 0.1)',
-      selected: 'rgba(255, 255, 255, 0.2)'
+      secondary: '#BDBDBD'
     }
   },
-
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontSize: '2.5rem',
-      fontWeight: 600,
-      letterSpacing: '-0.015em'
+      fontWeight: 600
     },
     h2: {
       fontSize: '2rem',
-      fontWeight: 600,
-      letterSpacing: '-0.005em'
+      fontWeight: 600
     },
     h3: {
       fontSize: '1.75rem',
       fontWeight: 600
-    },
-    h4: {
-      fontSize: '1.5rem',
-      fontWeight: 600
-    },
-    h5: {
-      fontSize: '1.25rem',
-      fontWeight: 600
-    },
-    h6: {
-      fontSize: '1.125rem',
-      fontWeight: 600
-    },
-    subtitle1: {
-      fontSize: '1rem',
-      fontWeight: 500
-    },
-    subtitle2: {
-      fontSize: '0.875rem',
-      fontWeight: 500
     },
     body1: {
       fontSize: '1rem',
@@ -73,10 +40,6 @@ const theme = createTheme({
     body2: {
       fontSize: '0.875rem',
       lineHeight: 1.5
-    },
-    button: {
-      textTransform: 'none',
-      fontWeight: 600
     }
   },
   components: {
@@ -91,32 +54,13 @@ const theme = createTheme({
           '&:hover': {
             transform: 'translateY(-1px)'
           }
-        },
-        contained: {
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        },
-        outlined: {
-          borderColor: 'rgba(255, 255, 255, 0.12)',
-          '&:hover': {
-            borderColor: 'rgba(255, 255, 255, 0.2)'
-          }
         }
       }
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }
-      }
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          borderRadius: 16,
-          maxWidth: '90vw',
-          margin: '16px'
+          borderRadius: 12
         }
       }
     },
