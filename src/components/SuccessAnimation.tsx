@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import CheckIcon from '@mui/icons-material/Check';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 
 interface SuccessAnimationProps {
   open: boolean;
@@ -22,6 +22,11 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ open, onClose, mess
         transform: 'translate(-50%, -50%)',
         zIndex: 9999,
         display: open ? 'block' : 'none'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
       }}
     >
       <Box
@@ -49,15 +54,9 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ open, onClose, mess
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          <Button
-            variant="contained"
-            onClick={onClose}
-            sx={{ mt: 2 }}
-          >
-            Continue
-          </Button>
+          <Button variant="outlined" onClick={onClose}>Close</Button>
         </motion.div>
       </Box>
     </motion.div>

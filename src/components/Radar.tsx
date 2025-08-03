@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { motion, useAnimation } from 'framer-motion';
-import { WifiP2PPlugin, Device } from '../types/wifi-p2p';
+import { WifiP2PPlugin, Device } from '@capacitor-community/wifi-p2p';
 
 interface RadarProps {
   devices: Device[];
@@ -10,11 +10,9 @@ interface RadarProps {
 const Radar: React.FC<RadarProps> = ({ devices }) => {
   const container = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
-  const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
     const animateScan = async () => {
-      setIsScanning(true);
       await controls.start({
         rotate: [0, 360],
         transition: {
@@ -29,7 +27,6 @@ const Radar: React.FC<RadarProps> = ({ devices }) => {
 
     return () => {
       controls.stop();
-      setIsScanning(false);
     };
   }, [controls]);
 
