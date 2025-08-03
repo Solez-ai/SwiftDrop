@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+export const theme = createTheme({
   palette: {
     primary: {
       main: '#2196F3',
@@ -80,7 +80,6 @@ const theme = createTheme({
       }
     }
   },
-
   transitions: {
     create: (props = 'all') => `cubic-bezier(0.4, 0, 0.2, 1) ${props} 0.3s`
   }
