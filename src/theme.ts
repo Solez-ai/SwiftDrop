@@ -170,6 +170,19 @@ const themeOptions: ThemeOptions = {
 
 import { createTheme } from '@mui/material/styles';
 
+const customShadows = [
+  'none',
+  '0px 14px 21px -9px rgba(0,0,0,0.2), 0px 25px 40px 3px rgba(0,0,0,0.14), 0px 10px 48px 9px rgba(0,0,0,0.12)',
+  '0px 15px 22px -10px rgba(0,0,0,0.2), 0px 26px 42px 3px rgba(0,0,0,0.14), 0px 10px 50px 9px rgba(0,0,0,0.12)',
+  '0px 15px 24px -10px rgba(0,0,0,0.2), 0px 27px 44px 3px rgba(0,0,0,0.14), 0px 11px 52px 9px rgba(0,0,0,0.12)',
+  '0px 16px 24px -10px rgba(0,0,0,0.2), 0px 28px 46px 3px rgba(0,0,0,0.14), 0px 11px 54px 10px rgba(0,0,0,0.12)',
+  '0px 17px 26px -10px rgba(0,0,0,0.2), 0px 29px 48px 4px rgba(0,0,0,0.14), 0px 12px 56px 10px rgba(0,0,0,0.12)',
+  '0px 18px 28px -11px rgba(0,0,0,0.2), 0px 30px 50px 4px rgba(0,0,0,0.14), 0px 13px 58px 11px rgba(0,0,0,0.12)',
+  '0px 19px 30px -11px rgba(0,0,0,0.2), 0px 31px 52px 4px rgba(0,0,0,0.14), 0px 14px 60px 11px rgba(0,0,0,0.12)',
+
+  ...Array(17).fill('none'),
+];
+
 const themeOptions = {
   palette: {
     mode: 'light',
@@ -180,18 +193,7 @@ const themeOptions = {
       main: '#dc004e',
     },
   },
-  shadows: [
-    'none',
-    '0px 14px 21px -9px rgba(0,0,0,0.2), 0px 25px 40px 3px rgba(0,0,0,0.14), 0px 10px 48px 9px rgba(0,0,0,0.12)',
-    '0px 15px 22px -10px rgba(0,0,0,0.2), 0px 26px 42px 3px rgba(0,0,0,0.14), 0px 10px 50px 9px rgba(0,0,0,0.12)',
-    '0px 15px 24px -10px rgba(0,0,0,0.2), 0px 27px 44px 3px rgba(0,0,0,0.14), 0px 11px 52px 9px rgba(0,0,0,0.12)',
-    '0px 16px 24px -10px rgba(0,0,0,0.2), 0px 28px 46px 3px rgba(0,0,0,0.14), 0px 11px 54px 10px rgba(0,0,0,0.12)',
-    '0px 17px 26px -10px rgba(0,0,0,0.2), 0px 29px 48px 4px rgba(0,0,0,0.14), 0px 12px 56px 10px rgba(0,0,0,0.12)',
-    '0px 18px 28px -11px rgba(0,0,0,0.2), 0px 30px 50px 4px rgba(0,0,0,0.14), 0px 13px 58px 11px rgba(0,0,0,0.12)',
-    '0px 19px 30px -11px rgba(0,0,0,0.2), 0px 31px 52px 4px rgba(0,0,0,0.14), 0px 14px 60px 11px rgba(0,0,0,0.12)',
-    // Filler values to reach 25 entries as MUI expects:
-    ...Array(17).fill('none')
-  ]
+  shadows: customShadows,
 };
 
 export const theme = createTheme(themeOptions);
