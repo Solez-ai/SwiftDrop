@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import Onboarding from './components/Onboarding';
@@ -125,6 +126,10 @@ const themes = {
 
 function App() {
   const [theme, setTheme] = React.useState<'white' | 'black' | 'monospace'>('white');
+  const handleThemeSelect = (newTheme: 'white' | 'black' | 'monospace') => {
+    setTheme(newTheme);
+    localStorage.setItem('swift-drop-theme', newTheme);
+  };
   
   React.useEffect(() => {
     const savedTheme = localStorage.getItem('swift-drop-theme');
@@ -137,7 +142,7 @@ function App() {
     <ThemeProvider theme={themes[theme]}>
       <Router>
         <Routes>
-          <Route path="/" element={<Onboarding onThemeSelect={setTheme} />} />
+           <Route path="/" element={<Onboarding onThemeSelect={handleThemeSelect} />} />
           <Route path="/home" element={<Home />} />
         </Routes>
       </Router>

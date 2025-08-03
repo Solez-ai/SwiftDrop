@@ -12,7 +12,11 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const Onboarding = ({ onThemeSelect }: { onThemeSelect: (theme: string) => void }) => {
+interface OnboardingProps {
+  onThemeSelect: (theme: 'white' | 'black' | 'monospace') => void;
+}
+
+const Onboarding: React.FC<OnboardingProps> = ({ onThemeSelect }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [theme, setTheme] = useState('white');
@@ -37,7 +41,7 @@ const Onboarding = ({ onThemeSelect }: { onThemeSelect: (theme: string) => void 
     }
   ];
 
-  const handleThemeSelect = (selectedTheme: string) => {
+  const handleThemeSelect = (selectedTheme: 'white' | 'black' | 'monospace') => {
     setTheme(selectedTheme);
     onThemeSelect(selectedTheme);
     localStorage.setItem('swift-drop-theme', selectedTheme);
@@ -69,7 +73,7 @@ const Onboarding = ({ onThemeSelect }: { onThemeSelect: (theme: string) => void 
       {currentStep < steps.length ? (
         <>
           <img 
-            src={`/assets/onboarding/${steps[currentStep].image}`} 
+            src={`/src/assets/onboarding/${steps[currentStep].image}`} 
             alt={steps[currentStep].title}
             style={{ maxWidth: '300px', marginBottom: '20px' }}
           />
