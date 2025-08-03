@@ -14,7 +14,6 @@
     "@capacitor/cli": "^5.1.0",
     "@capacitor/core": "^5.1.0",
     "@capacitor/filesystem": "^5.2.2",
-    "@capacitor-community/wifi-p2p": "^1.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
