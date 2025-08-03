@@ -1,31 +1,24 @@
 import React from 'react';
 import { Box, Typography, Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
-import QRCode from 'qrcode.react';
-import { WifiP2PPlugin } from '@capacitor-community/wifi-p2p';
+import { QRCode as QRCodeComponent } from 'qrcode.react';
+import type { WifiP2PPlugin } from '../types/wifi-p2p';
 
 interface QRCodeProps {
   open: boolean;
   onClose: () => void;
   deviceAddress: string;
+  onConnect?: (address: string) => void;
 }
 
-const QRCodeDialog: React.FC<QRCodeProps> = ({ open, onClose, deviceAddress }) => {
+const QRCodeDialog: React.FC<QRCodeProps> = ({ open, onClose, deviceAddress, onConnect }) => {
   const qrValue = `swift-drop://${deviceAddress}`;
 
   const handleScan = async (address: string) => {
     try {
-      await WifiP2PPlugin.connectToDevice({ deviceAddress: address });
+      // TODO: Implement actual WiFi P2P connection logic
+      onConnect?.(address);
       onClose();
     } catch (error: unknown) {
-      console.error('Error connecting via QR:', error);
-    }
-  };
-
-  const handleScan = async (address: string) => {
-    try {
-      await WifiP2PPlugin.connectToDevice({ deviceAddress: address });
-      onClose();
-    } catch (error) {
       console.error('Error connecting via QR:', error);
     }
   };
@@ -38,7 +31,7 @@ const QRCodeDialog: React.FC<QRCodeProps> = ({ open, onClose, deviceAddress }) =
           <Typography variant="body1" align="center">
             Scan this QR code to connect with another device
           </Typography>
-          <QRCode
+          <QRCodeComponent
             value={qrValue}
             size={256}
             level="H"

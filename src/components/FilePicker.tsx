@@ -13,7 +13,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import FileIcon from '@mui/icons-material/InsertDriveFile';
@@ -46,10 +47,11 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
   const loadFiles = async () => {
     try {
       setLoading(true);
-      const files = await Filesystem.readdir({
+      const result = await Filesystem.readdir({
         path: currentPath,
         directory: Directory.ExternalStorage
       });
+      const files = result.files || [];
 
       const fileItems = files.files.map(file => ({
         path: `${currentPath}/${file.name}`,
@@ -61,9 +63,10 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
       }));
       
       setFiles(fileItems);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error loading files:', error);
-      setSnackbarMessage(`Error loading files: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setSnackbarMessage(`Error loading files: ${errorMessage}`);
       setShowSnackbar(true);
     } finally {
       setLoading(false);
@@ -72,6 +75,7 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
 
   const getFileType = (fileName: string): string => {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    if (!extension) return 'document';
     if (extension === 'apk') return 'apk';
     if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return 'image';
     if (['mp4', 'avi', 'mkv'].includes(extension)) return 'video';
@@ -135,13 +139,13 @@ const FilePicker: React.FC<FilePickerProps> = ({ onFilesSelected, onClose }) => 
     if (file.isDirectory) return <FolderIcon />;
     switch (file.type) {
       case 'apk':
-        return <img src="/icons/apk.png" alt="APK" style={{ width: 24, height: 24 }} />;
+        return <FileIcon sx={{ color: 'primary.main' }} />;
       case 'image':
-        return <img src="/icons/image.png" alt="Image" style={{ width: 24, height: 24 }} />;
+        return <FileIcon sx={{ color: 'secondary.main' }} />;
       case 'video':
-        return <img src="/icons/video.png" alt="Video" style={{ width: 24, height: 24 }} />;
+        return <FileIcon sx={{ color: 'error.main' }} />;
       case 'audio':
-        return <img src="/icons/audio.png" alt="Audio" style={{ width: 24, height: 24 }} />;
+        return <FileIcon sx={{ color: 'warning.main' }} />;
       default:
         return <FileIcon />;
     }

@@ -1,13 +1,20 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { motion, useAnimation } from 'framer-motion';
-import { WifiP2PPlugin, Device } from '@capacitor-community/wifi-p2p';
+import type { WifiP2PPlugin } from '../types/wifi-p2p';
+
+interface Device {
+  deviceAddress: string;
+  deviceName: string;
+  status: string;
+  isGroupOwner: boolean;
+}
 
 interface RadarProps {
   devices: Device[];
 }
 
-const Radar: React.FC<RadarProps> = ({ devices }) => {
+const Radar: React.FC<RadarProps> = ({ devices = [] }) => {
   const container = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
 
