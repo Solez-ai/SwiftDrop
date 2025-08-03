@@ -29,6 +29,7 @@ const theme = createTheme({
       selected: 'rgba(255, 255, 255, 0.2)'
     }
   },
+
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
@@ -92,7 +93,7 @@ const theme = createTheme({
           }
         },
         contained: {
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         },
         outlined: {
           borderColor: 'rgba(255, 255, 255, 0.12)',
@@ -106,7 +107,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }
       }
     },
