@@ -1,15 +1,41 @@
-# SwiftDrop - Offline File Transfer App
+# ⚡ SwiftDrop
 
-A modern, offline file transfer application for Android devices using Wi-Fi Direct.
+**SwiftDrop** is a blazing-fast, modern Android file-sharing app built with **React + Capacitor**, designed for **true offline sharing** via **Wi-Fi Direct (P2P)** — no internet, no middlemen, no nonsense.
 
-## Features
+Effortless transfers. Real files. Pure speed.
 
-- Offline peer-to-peer file transfers using Wi-Fi Direct
-- Clean, matte UI with multiple theme options
-- File transfer progress tracking
-- Device discovery and connection management
-- Support for all file types
-- QR code connection option
+---
+
+## 🚀 What SwiftDrop Does
+
+SwiftDrop lets you:
+
+- 🔗 **Send & Receive Any File Type**  
+  Share photos, videos, documents, APKs, even full apps — no size limits, no file restrictions.
+
+- 📡 **Radar-Based Discovery**  
+  Nearby devices appear on a slick, animated radar view. Tap to connect and go.
+
+- 📷 **QR Mode for Direct Transfers**  
+  Prefer scanning? Instantly connect with QR codes as a fallback or quick link.
+
+- 📁 **Full Native File Access**  
+  Browse, select, and send from your device's actual file system. No sandbox limits.
+
+- 🔒 **No Cloud, No Internet**  
+  All sharing happens locally over Wi-Fi Direct — your data never leaves your device.
+
+---
+
+## ⚙️ How It Works (Under the Hood)
+
+- Built with **React + Next.js**
+- Wrapped for Android with **Capacitor**
+- Uses native **Wi-Fi P2P (WiFi-Direct)** and **Android NSD**
+- Offline communication with **no pairing or internet needed**
+- Permissions handled in onboarding: storage, location, network, nearby devices
+
+---
 
 ## Setup
 
