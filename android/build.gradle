@@ -1,7 +1,29 @@
+// Load keystore properties if the file exists
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 buildscript {
     ext {
-        kotlin_version = '1.8.0'
+        kotlin_version = '1.8.22'
         compose_version = '1.4.3'
+        
+        // Dependency versions
+        android_gradle_plugin_version = '8.0.2'
+        google_services_version = '4.3.15'
+        firebase_bom_version = '32.2.0'
+        
+        // AndroidX versions
+        appcompat_version = '1.6.1'
+        core_ktx_version = '1.10.1'
+        lifecycle_version = '2.6.1'
+        
+        // Testing
+        junit_version = '4.13.2'
+        test_ext_junit_version = '1.1.5'
+        espresso_version = '3.5.1'
     }
     
     repositories {
@@ -11,9 +33,10 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.0'
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
+        classpath "com.google.gms:google-services:$google_services_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.5'
     }
 }
 
@@ -22,6 +45,85 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        
+        // Add any other repositories here
+    }
+    
+    // Configure all projects with common settings
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                compileSdkVersion 33
+                
+                defaultConfig {
+                    minSdkVersion 22
+                    targetSdkVersion 33
+                    
+                    // Enable Java 8 features
+                    compileOptions {
+                        sourceCompatibility JavaVersion.VERSION_1_8
+                        targetCompatibility JavaVersion.VERSION_1_8
+                    }
+                    
+                    // Enable vector drawable support
+                    vectorDrawables.useSupportLibrary = true
+                }
+                
+                // Enable view binding
+                buildFeatures {
+                    viewBinding true
+                }
+                
+                // Enable data binding if needed
+                buildFeatures {
+                    dataBinding true
+                }
+                
+                // Configure signing configs
+                signingConfigs {
+                    release {
+                        if (keystorePropertiesFile.exists()) {
+                            keyAlias keystoreProperties['keyAlias']
+                            keyPassword keystoreProperties['keyPassword']
+                            storeFile file(keystoreProperties['storeFile'])
+                            storePassword keystoreProperties['storePassword']
+                        }
+                    }
+                }
+                
+                // Configure build types
+                buildTypes {
+                    release {
+                        if (keystorePropertiesFile.exists()) {
+                            signingConfig signingConfigs.release
+                        }
+                        minifyEnabled true
+                        shrinkResources true
+                        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                    }
+                    
+                    debug {
+                        applicationIdSuffix ".debug"
+                        versionNameSuffix "-DEBUG"
+                        debuggable true
+                    }
+                }
+                
+                // Configure product flavors if needed
+                flavorDimensions "default"
+                productFlavors {
+                    dev {
+                        dimension "default"
+                        applicationIdSuffix ".dev"
+                        versionNameSuffix "-dev"
+                    }
+                    
+                    prod {
+                        dimension "default"
+                    }
+                }
+            }
+        }
     }
 }
 

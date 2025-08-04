@@ -1,34 +1,89 @@
 plugins {
     id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'kotlin-kapt'
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
+    sourceSets {
+        main.java.srcDirs += 'src/main/java/com/swift/drop'
+    }
     namespace "com.swift.drop"
     compileSdkVersion 33
+    
+    signingConfigs {
+        release {
+            storeFile file("swiftdrop-keystore.jks")
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PASSWORD')
+        }
+    }
     
     defaultConfig {
         applicationId "com.swift.drop"
         minSdkVersion 22
         targetSdkVersion 33
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
+        multiDexEnabled true
         
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
+        // Enable vector drawable support
+        vectorDrawables.useSupportLibrary = true
+        
         aaptOptions {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+            cruncherEnabled = false
         }
         
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
+        
+        // Enable Java 8 features
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+        
+        // Enable view binding
+        buildFeatures {
+            viewBinding true
+        }
     }
     
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Enable code and resource shrinking
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            pseudoLocalesEnabled false
+            
+            // Optimize APK size
+            zipAlignEnabled true
+            
+            // Enable R8 full mode
+            setProguardFiles([
+                'proguard-android-optimize.txt',
+                'proguard-rules.pro'
+            ])
+        }
+        
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-DEBUG"
+            debuggable true
         }
     }
     
@@ -51,19 +106,33 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     
-    // AndroidX dependencies
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
-    implementation "androidx.core:core-splashscreen:1.0.0"
-    implementation "androidx.core:core-ktx:1.10.0"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
+    // AndroidX Core
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.6.1'
     
-    // Testing dependencies
-    testImplementation "junit:junit:4.13.2"
-    androidTestImplementation "androidx.test.ext:junit:1.1.5"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
+    // Material Design
+    implementation 'com.google.android.material:material:1.9.0'
+    
+    // Firebase (optional for analytics/crashlytics)
+    implementation platform('com.google.firebase:firebase-bom:32.2.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    
+    // Image loading
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     
     // Capacitor dependencies
     implementation project(':capacitor-android')

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
-  Button as MuiButton,
-  Grid as MuiGrid,
+  Button,
+  Grid,
   Paper,
   CircularProgress,
   Dialog,
@@ -17,38 +17,121 @@ import {
   useMediaQuery,
   styled,
   alpha,
-  Transitions
+  IconButton,
+  Tooltip,
+  Fade,
+  Zoom,
+  Slide
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Filesystem } from '@capacitor/filesystem';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { WifiP2P } from '@capacitor-community/wifi-p2p';
+import { Share, QrCode, Wifi, Devices, FileUpload, FileDownload, Settings, Info } from '@mui/icons-material';
 import QRCodeDialog from './QRCode';
 import Radar from './Radar';
 import FilePicker from './FilePicker';
 import SuccessAnimation from './SuccessAnimation';
-import { formatStorage } from '../utils/fileUtils';
+import { formatStorage, getFileIcon } from '../utils/fileUtils';
 import { theme } from '../theme';
+import { WifiP2PDevice } from '../types/capacitor';
 
 // Styled components for better control
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  borderRadius: 12,
-  transition: theme.transitions.create(['box-shadow', 'transform']),
+  borderRadius: 16,
+  background: theme.palette.mode === 'dark' 
+    ? 'linear-gradient(145deg, #1a1a1a, #2a2a2a)' 
+    : 'linear-gradient(145deg, #ffffff, #f5f5f5)',
+  boxShadow: theme.shadows[2],
+  transition: theme.transitions.create(['box-shadow', 'transform'], {
+    duration: theme.transitions.duration.standard,
+  }),
   '&:hover': {
-    boxShadow: theme.shadows[4],
-    transform: 'translateY(-2px)'
+    boxShadow: theme.shadows[8],
+    transform: 'translateY(-4px)'
+  },
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  textAlign: 'center',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    background: theme.palette.primary.main,
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+  },
+  '&:hover::before': {
+    opacity: 1,
   }
 }));
 
 const ActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: 8,
-  padding: '8px 24px',
+  borderRadius: 12,
+  padding: '12px 32px',
   textTransform: 'none',
   fontWeight: 600,
-  transition: theme.transitions.create(['transform', 'box-shadow']),
+  fontSize: '1rem',
+  letterSpacing: '0.5px',
+  transition: theme.transitions.create(
+    ['transform', 'box-shadow', 'background-color'],
+    { duration: theme.transitions.duration.standard }
+  ),
   '&:hover': {
-    transform: 'translateY(-1px)',
-    boxShadow: theme.shadows[2]
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[4],
+    backgroundColor: theme.palette.primary.dark
+  },
+  '& .MuiButton-startIcon': {
+    transition: 'transform 0.3s ease',
+  },
+  '&:hover .MuiButton-startIcon': {
+    transform: 'scale(1.2)'
   }
+}));
+
+const FeatureCard = styled(StyledPaper)(({ theme }) => ({
+  padding: theme.spacing(4, 3),
+  '& .MuiSvgIcon-root': {
+    fontSize: '2.5rem',
+    marginBottom: theme.spacing(2),
+    color: theme.palette.primary.main,
+  },
+  '& h3': {
+    marginBottom: theme.spacing(1.5),
+    fontWeight: 700,
+    color: theme.palette.text.primary,
+  },
+  '& p': {
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(2),
+    minHeight: 60,
+  },
+}));
+
+const StatusBadge = styled('span')(({ theme }) => ({
+  position: 'absolute',
+  top: 12,
+  right: 12,
+  width: 12,
+  height: 12,
+  borderRadius: '50%',
+  backgroundColor: theme.palette.success.main,
+  boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+  '&.offline': {
+    backgroundColor: theme.palette.error.main,
+  },
+  '&.connecting': {
+    backgroundColor: theme.palette.warning.main,
+  },
 }));
 
 const DeviceItem = styled('div')(({ theme }) => ({
