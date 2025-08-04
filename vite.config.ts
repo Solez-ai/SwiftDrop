@@ -48,6 +48,12 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': resolve(__dirname, './src'),
+        // Add fallback for Node.js core modules
+        'path': 'path-browserify',
+        'os': 'os-browserify/browser',
+        'crypto': 'crypto-browserify',
+        'stream': 'stream-browserify',
+        'buffer': 'buffer/',
         '~': resolve(__dirname, './node_modules'),
       },
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
@@ -62,19 +68,13 @@ export default defineConfig(({ mode }) => {
     // Plugins
     plugins: [
       react({
-        // Use React Refresh
-        fastRefresh: true,
-        // Enable the new JSX transform
         jsxImportSource: '@emotion/react',
-        // Babel configuration
         babel: {
-          plugins: [
-            ['@emotion/babel-plugin', { sourceMap: mode !== 'production' }],
-            // Other Babel plugins...
-          ],
+          plugins: ['@emotion/babel-plugin'],
         },
+        // Enable Fast Refresh
+        fastRefresh: true,
       }),
-      
       // Enable TypeScript path resolution from tsconfig paths
       tsconfigPaths(),
       
