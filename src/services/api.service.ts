@@ -1,16 +1,27 @@
 import { APP_CONFIG } from '../config';
-import { storageService } from './storage.service';
-import { showError } from '../utils/notificationUtils';
+
+// Extend the ErrorConstructor interface to include captureStackTrace
+declare global {
+  interface ErrorConstructor {
+    captureStackTrace?(error: Error, constructorOpt?: Function): void;
+  }
+}
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, any>;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
   requireAuth?: boolean;
+  // Standard fetch options
+  method?: string;
+  body?: BodyInit | null;
+  signal?: AbortSignal | null;
+  // Add other standard RequestInit properties as needed
+  [key: string]: any;
 }
 
 interface ApiResponse<T = any> {
@@ -18,6 +29,22 @@ interface ApiResponse<T = any> {
   status: number;
   statusText: string;
   headers: Headers;
+}
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number = 0,
+    public data?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
+    
+    // Maintains proper stack trace for where our error was thrown
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ApiError);
+    }
+  }
 }
 
 class ApiService {
@@ -56,8 +83,8 @@ class ApiService {
     data: any = null,
     options: RequestOptions = {}
   ): Promise<ApiResponse<T>> {
+    let headers = { ...options.headers };
     const {
-      headers = {},
       params = {},
       timeout = APP_CONFIG.API_TIMEOUT,
       retries = 2,
@@ -68,6 +95,7 @@ class ApiService {
 
     // Add authentication token if required
     if (requireAuth && this.authToken) {
+      headers = headers || {};
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
 
@@ -76,12 +104,21 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}${queryString}`;
 
     // Prepare request config
+    // Create a new Headers object with default headers
+    const requestHeaders = new Headers(this.defaultHeaders);
+    
+    // Add any additional headers
+    if (headers) {
+      Object.entries(headers).forEach(([key, value]) => {
+        if (value !== undefined) {
+          requestHeaders.set(key, value);
+        }
+      });
+    }
+
     const config: RequestInit = {
       method,
-      headers: {
-        ...this.defaultHeaders,
-        ...headers,
-      },
+      headers: requestHeaders,
       ...fetchOptions,
     };
 
@@ -89,12 +126,13 @@ class ApiService {
     if (method !== 'GET' && data) {
       if (data instanceof FormData) {
         // For file uploads, let the browser set the Content-Type with boundary
-        delete config.headers?.['Content-Type'];
+        requestHeaders.delete('Content-Type');
+        config.headers = requestHeaders as any; // Type assertion needed here
         config.body = data;
       } else if (typeof data === 'object') {
         config.body = JSON.stringify(data);
       } else {
-        config.body = data;
+        config.body = data as any;
       }
     }
 
@@ -131,19 +169,18 @@ class ApiService {
           statusText: response.statusText,
           headers: response.headers,
         };
-      } catch (error) {
-        lastError = error;
+      } catch (error: unknown) {
+        lastError = error instanceof Error ? error : new Error(String(error));
         
         // Don't retry on certain errors
-        if (
-          error instanceof ApiError && 
-          (error.status === 401 || error.status === 403 || error.status === 404)
-        ) {
-          break;
+        if (error instanceof ApiError) {
+          if (error.status === 401 || error.status === 403 || error.status === 404) {
+            break;
+          }
         }
 
         // Don't retry if aborted due to timeout
-        if (error.name === 'AbortError') {
+        if (error instanceof Error && error.name === 'AbortError') {
           throw new ApiError('Request timeout', 408);
         }
 
@@ -309,25 +346,6 @@ class ApiService {
       
       xhr.send(formData);
     });
-  }
-}
-
-/**
- * Custom API error class
- */
-class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number = 0,
-    public data?: any
-  ) {
-    super(message);
-    this.name = 'ApiError';
-    
-    // Maintains proper stack trace for where our error was thrown
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ApiError);
-    }
   }
 }
 
