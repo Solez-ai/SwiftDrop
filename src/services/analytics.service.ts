@@ -1,8 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { APP_CONFIG } from '../config';
 import { storageService } from './storage.service';
-import { apiService } from './api.service';
-import { showError } from '../utils/notificationUtils';
 
 type EventName = 
   | 'app_launch'
@@ -29,7 +27,7 @@ class AnalyticsService {
   private readonly SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
   private lastEventTime: number = 0;
   private queue: Array<{ event: string; properties: EventProperties }> = [];
-  private flushInterval: NodeJS.Timeout | null = null;
+  private flushInterval: any = null;
   private readonly FLUSH_INTERVAL = 10 * 1000; // 10 seconds
   private readonly MAX_QUEUE_SIZE = 50;
 
@@ -189,7 +187,12 @@ class AnalyticsService {
       console.error('Error flushing analytics events:', error);
       
       // If there was an error, put the events back in the queue (except if it's a client error)
-      if (!(error instanceof Error) || !error.message.includes('4')) {
+      const isClientError = error instanceof Error && 
+                         'message' in error && 
+                         typeof error.message === 'string' && 
+                         error.message.includes('4');
+      
+      if (!isClientError) {
         this.queue.unshift(...eventsToSend);
       }
     }

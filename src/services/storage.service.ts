@@ -31,8 +31,9 @@ class StorageService {
       await Preferences.set({ key, value: stringValue });
       this.cache.set(key, deepClone(value));
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`Error setting value for key "${key}":`, error);
-      throw new Error(`Failed to store data: ${error.message}`);
+      throw new Error(`Failed to store data: ${errorMessage}`);
     }
   }
 
@@ -54,10 +55,15 @@ class StorageService {
         return defaultValue;
       }
       
-      const parsedValue = JSON.parse(value) as T;
-      // Cache the parsed value
-      this.cache.set(key, deepClone(parsedValue));
-      return parsedValue;
+      try {
+        const parsedValue = JSON.parse(value) as T;
+        // Cache the parsed value
+        this.cache.set(key, deepClone(parsedValue));
+        return parsedValue;
+      } catch (parseError) {
+        console.error(`Error parsing stored value for key "${key}":`, parseError);
+        return defaultValue;
+      }
     } catch (error) {
       console.error(`Error getting value for key "${key}":`, error);
       return defaultValue;
@@ -73,8 +79,9 @@ class StorageService {
       await Preferences.remove({ key });
       this.cache.delete(key);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`Error removing key "${key}":`, error);
-      throw new Error(`Failed to remove data: ${error.message}`);
+      throw new Error(`Failed to remove data: ${errorMessage}`);
     }
   }
 
@@ -86,8 +93,9 @@ class StorageService {
       await Preferences.clear();
       this.cache.clear();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error clearing storage:', error);
-      throw new Error('Failed to clear storage');
+      throw new Error(`Failed to clear storage: ${errorMessage}`);
     }
   }
 
